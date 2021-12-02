@@ -83,6 +83,8 @@ canvas {
 
 /* General */
 .hidden {
+	top: -9999px;
+	left: -9999px;
 	visibility: hidden;
 	position: absolute;
 	opacity: 0;

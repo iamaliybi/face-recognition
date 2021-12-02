@@ -2658,12 +2658,6 @@ import * as facemesh from '@tensorflow-models/facemesh';
 
 		let ctx;
 
-		const isMobile = () => {
-			const isAndroid = /Android/i.test(navigator.userAgent);
-			const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-			return isAndroid || isiOS;
-		}
-
 		const makeCanvas = () => {
 			if (ctx && document.body.contains(ctx.canvas)) {
 				ctx.canvas.remove();
@@ -2685,15 +2679,24 @@ import * as facemesh from '@tensorflow-models/facemesh';
 			v.autoplay = 1;
 			v.id = "face-screen";
 
-			
+
 			wrapper.append(v);
 
 			video = v;
 			video.addEventListener('loadeddata', onLoadVideo);
 		}
 
-		const useFaceRecognition = () => {
-			return `<div id="face-notfound" class="not-found"><img src="/assets/images/face-recognition.png"></div>`;
+		const makeFaceRecognition = () => {
+			const d = document.createElement('div');
+			d.id = "face-notfound";
+			d.classList.add('not-found');
+
+			const img = document.createElement('img');
+			img.src = "/assets/images/face-recognition.png";
+
+			d.appendChild(img);
+
+			wrapper.appendChild(d);
 		}
 
 		const drawTriangle = (points, closePath) => {
@@ -2725,8 +2728,10 @@ import * as facemesh from '@tensorflow-models/facemesh';
 		}
 
 		const draw = () => {
+			const faceNotFoundEl = document.getElementById('face-notfound');
+
 			if (predictions.length > 0) {
-				wrapper.innerHTML = null;
+				if (faceNotFoundEl) faceNotFoundEl.remove();
 				makeCanvas();
 
 				predictions.forEach(prediction => {
@@ -2747,7 +2752,8 @@ import * as facemesh from '@tensorflow-models/facemesh';
 					drawMesh(keypoints);
 				});
 			} else {
-				wrapper.innerHTML = useFaceRecognition();
+				if (ctx && ctx.canvas) ctx.canvas.remove();
+				if (!faceNotFoundEl) makeFaceRecognition();
 			}
 		}
 
@@ -2782,7 +2788,9 @@ import * as facemesh from '@tensorflow-models/facemesh';
 				if (window.navigator && window.navigator.mediaDevices) {
 					window.navigator.mediaDevices
 						.getUserMedia({
-							video: true
+							video: {
+								facingMode: "environment"
+							}
 						}).then(stream => {
 							video.srcObject = stream;
 						});
