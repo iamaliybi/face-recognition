@@ -1,6 +1,3 @@
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-
 module.exports = {
 	stats: {
 		assets: false,
@@ -8,31 +5,8 @@ module.exports = {
 	},
 
 	entry: {
-		app: './src/index.js',
+		app: __dirname + '/../src/index.js',
 	},
-
-	output: {
-		path: __dirname + '/../build',
-		publicPath: './public',
-		filename: '[name].bundle.[contenthash:8].js'
-	},
-
-	stats: {
-		modules: false
-	},
-
-	plugins: [
-		new HtmlWebpackPlugin({
-			template: './public/index.html',
-			title: 'Face Recognition | Ali Yaghoubi',
-			publicPath: '',
-		}),
-		new CopyWebpackPlugin({
-			patterns: [
-				{ from: "public/assets", to: "assets" },
-			],
-		})
-	],
 
 	module: {
 		rules: [
