@@ -1,4 +1,4 @@
-import * as tfjs from '@tensorflow/tfjs';
+import '@tensorflow/tfjs';
 import * as facemesh from '@tensorflow-models/facemesh';
 
 (
@@ -2646,9 +2646,9 @@ import * as facemesh from '@tensorflow-models/facemesh';
 			255,
 		];
 
-		const video = document.getElementById('face-screen');
+		const wrapper = document.getElementsByClassName('wrapper')[0];
 
-		const faceIcon = document.getElementById('face-notfound');
+		let video;
 
 		const FPS = 30;
 
@@ -2657,6 +2657,12 @@ import * as facemesh from '@tensorflow-models/facemesh';
 		let predictions;
 
 		let ctx;
+
+		const isMobile = () => {
+			const isAndroid = /Android/i.test(navigator.userAgent);
+			const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+			return isAndroid || isiOS;
+		}
 
 		const makeCanvas = () => {
 			if (ctx && document.body.contains(ctx.canvas)) {
@@ -2671,6 +2677,23 @@ import * as facemesh from '@tensorflow-models/facemesh';
 
 			ctx = canvas.getContext('2d');
 			document.body.append(canvas);
+		}
+
+		const makeVideo = () => {
+			const v = document.createElement('video');
+			v.muted = 1;
+			v.autoplay = 1;
+			v.id = "face-screen";
+
+			
+			wrapper.append(v);
+
+			video = v;
+			video.addEventListener('loadeddata', onLoadVideo);
+		}
+
+		const useFaceRecognition = () => {
+			return `<div id="face-notfound" class="not-found"><img src="/assets/images/face-recognition.png"></div>`;
 		}
 
 		const drawTriangle = (points, closePath) => {
@@ -2703,7 +2726,7 @@ import * as facemesh from '@tensorflow-models/facemesh';
 
 		const draw = () => {
 			if (predictions.length > 0) {
-				faceIcon.classList.add('hidden');
+				wrapper.innerHTML = null;
 				makeCanvas();
 
 				predictions.forEach(prediction => {
@@ -2724,8 +2747,7 @@ import * as facemesh from '@tensorflow-models/facemesh';
 					drawMesh(keypoints);
 				});
 			} else {
-				faceIcon.classList.remove('hidden');
-				ctx.canvas.classList.add('hidden')
+				wrapper.innerHTML = useFaceRecognition();
 			}
 		}
 
@@ -2743,18 +2765,20 @@ import * as facemesh from '@tensorflow-models/facemesh';
 				scale: .8,
 			});
 
+			document.getElementById('video-loading').remove();
 			setInterval(detect, FPS);
 		}
 
 		const onLoadVideo = () => {
 			video.classList.add('hidden');
+
 			runFacemesh();
 		}
 
 		const init = () => {
-			video.addEventListener('loadeddata', onLoadVideo);
-
 			try {
+				makeVideo();
+
 				if (window.navigator && window.navigator.mediaDevices) {
 					window.navigator.mediaDevices
 						.getUserMedia({
