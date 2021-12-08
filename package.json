@@ -34,7 +34,9 @@
 		"webpack-merge": "^5.8.0"
 	},
 	"dependencies": {
-		"@tensorflow-models/facemesh": "^0.0.5",
-		"@tensorflow/tfjs": "^3.11.0"
+		"@tensorflow-models/face-landmarks-detection": "^0.0.3",
+		"@tensorflow/tfjs": "^3.11.0",
+		"@tensorflow/tfjs-backend-webgl": "^3.11.0",
+		"@tensorflow/tfjs-converter": "^3.11.0"
 	}
 }

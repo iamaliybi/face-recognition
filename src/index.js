@@ -1,5 +1,5 @@
-import '@tensorflow/tfjs';
-import * as facemesh from '@tensorflow-models/facemesh';
+import * as facemesh from '@tensorflow-models/face-landmarks-detection';
+import '@tensorflow/tfjs-backend-webgl';
 
 import { TRIANGULATION } from './constants';
 
@@ -16,7 +16,7 @@ import { TRIANGULATION } from './constants';
 		let predictions;
 
 		let ctx;
-
+		
 		const renderCanvas = () => {
 			if (ctx && document.body.contains(ctx.canvas)) {
 				ctx.canvas.remove();
@@ -41,7 +41,6 @@ import { TRIANGULATION } from './constants';
 			wrapper.append(v);
 
 			video = v;
-			video.addEventListener('loadeddata', onLoadVideo);
 		}
 
 		const renderFaceLoading = () => {
@@ -70,12 +69,12 @@ import { TRIANGULATION } from './constants';
 				region.closePath();
 			}
 
-			ctx.strokeStyle = 'pink';
+			ctx.strokeStyle = '#ff5951';
 			ctx.stroke(region);
 		}
 
 		const drawMesh = (keypoints) => {
-			for (let i = 0; i < keypoints.length; i++) {
+			for (let i = 0; i < 468; i++) {
 				const [x, y] = keypoints[i];
 
 				ctx.beginPath();
@@ -99,10 +98,9 @@ import { TRIANGULATION } from './constants';
 
 					for (let i = 0; i < TRIANGULATION.length / 3; i++) {
 						const points = [
-							TRIANGULATION[i * 3],
-							TRIANGULATION[i * 3 + 1],
-							TRIANGULATION[i * 3 + 2],
-						].map((index) => keypoints[index]);
+							TRIANGULATION[i * 3], TRIANGULATION[i * 3 + 1],
+							TRIANGULATION[i * 3 + 2]
+						].map(index => keypoints[index]);
 
 						//  Draw Triangle
 						drawTriangle(points, true);
@@ -118,18 +116,18 @@ import { TRIANGULATION } from './constants';
 		}
 
 		const detect = async () => {
-			predictions = await model.estimateFaces(video);
+			predictions = await model.estimateFaces({
+				input: video,
+				returnTensors: false,
+				flipHorizontal: false,
+				predictIrises: true,
+			});
+
 			draw();
 		}
 
-		const runFacemesh = async () => {
-			model = await facemesh.load({
-				inputResolution: {
-					width: 640,
-					height: 480,
-				},
-				scale: .8,
-			});
+		const runFacemesh = async () => { // '/assets/models/model.json'
+			model = await facemesh.load(facemesh.SupportedPackages.mediapipeFacemesh);
 
 			document.getElementById('video-loading').remove();
 			setInterval(detect, FPS);
@@ -154,6 +152,8 @@ import { TRIANGULATION } from './constants';
 						}).then(stream => {
 							video.srcObject = stream;
 							video.play();
+
+							video.addEventListener('loadeddata', onLoadVideo);
 						});
 				} else alert("This feature is not supported by your browser");
 			} catch (e) {
